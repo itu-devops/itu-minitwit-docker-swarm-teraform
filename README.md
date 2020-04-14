@@ -20,10 +20,9 @@ For other platforms: https://www.terraform.io/downloads.html
 
 ### Clone this repository
 
-TODO
 
 ```bash
-git clone ...
+git clone https://github.com/itu-devops/itu-minitwit-docker-swarm-teraform
 ```
 
 ### Generate ssh key
