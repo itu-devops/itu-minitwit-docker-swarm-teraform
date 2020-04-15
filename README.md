@@ -207,7 +207,7 @@ Nodes in docker swarm clusters have one of three roles:
 * `manager` nodes that can manage the cluster, commands can be issued to managers, and will be carried out by the leader. If leader becomes unavailable, a manager will be promoted to the new leader.
 * `worker` hosts containers
 
-* Do note that in a docker swarm cluster, the leader is also a manager, and all managers are also workers! (at least by default) *
+**Do note that in a docker swarm cluster, the leader is also a manager, and all managers are also workers! (at least by default)**
 
 
 
