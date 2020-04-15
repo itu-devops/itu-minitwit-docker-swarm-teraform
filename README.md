@@ -75,7 +75,7 @@ To create a new space click on the spaces tab in menu on the left (https://cloud
 
 ![](images/create_space.png)
 
-Choose the Franfurt datacenter region and enter a name for the space.
+Choose the Frankfurt datacenter region and enter a name for the space.
 
 (You can choose another region if you want, just edit the terraform backend file `backend.tf` to chosen region)
 
@@ -149,7 +149,7 @@ We can inspect the running cluster and stack with the visualizer container:
 
 
 
-# Cool, so how do I scale?
+# Scaling the cluster and stack
 
 ## Interacting with the Minitwit stack
 
@@ -232,7 +232,7 @@ Preview the changes to made at next apply
 terraform plan
 ```
 
-Apply changes --> actually create the cloud environment
+Apply changes
 ```bash
 terraform apply
 ```
