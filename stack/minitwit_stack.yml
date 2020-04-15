@@ -40,4 +40,4 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
     deploy:
-      replicas: 2
+      replicas: 1

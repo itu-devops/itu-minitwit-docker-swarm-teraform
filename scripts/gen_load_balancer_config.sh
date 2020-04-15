@@ -6,7 +6,7 @@ output_file='temp/load_balancer.conf'
 rm $output_file &>/dev/null
 cp $template_file $output_file
 
-rows=$(terraform output minitwit-swarm-master-ip-address)
+rows=$(terraform output minitwit-swarm-leader-ip-address)
 rows+=' '
 rows+=$(terraform output -json minitwit-swarm-manager-ip-address | jq -r .[])
 rows+=' '

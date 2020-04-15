@@ -1,13 +1,14 @@
-#                      _
-#  _ __ ___   __ _ ___| |_ ___ _ __
-# | '_ ` _ \ / _` / __| __/ _ \ '__|
-# | | | | | | (_| \__ \ ||  __/ |
-# |_| |_| |_|\__,_|___/\__\___|_|
+
+#  _                _
+# | | ___  __ _  __| | ___ _ __
+# | |/ _ \/ _` |/ _` |/ _ \ '__|
+# | |  __/ (_| | (_| |  __/ |
+# |_|\___|\__,_|\__,_|\___|_|
 
 # create cloud vm
-resource "digitalocean_droplet" "minitwit-swarm-master" {
+resource "digitalocean_droplet" "minitwit-swarm-leader" {
   image = "docker-18-04"
-  name = "minitwit-swarm-master"
+  name = "minitwit-swarm-leader"
   region = var.region
   size = "1gb"
   # add public ssh key so we can access the machine
@@ -63,8 +64,8 @@ resource "digitalocean_droplet" "minitwit-swarm-master" {
 
 # create cloud vm
 resource "digitalocean_droplet" "minitwit-swarm-manager" {
-  # create managers after the master
-  depends_on = [digitalocean_droplet.minitwit-swarm-master]
+  # create managers after the leader
+  depends_on = [digitalocean_droplet.minitwit-swarm-leader]
 
   # number of vms to create
   count = 2
@@ -102,7 +103,7 @@ resource "digitalocean_droplet" "minitwit-swarm-manager" {
       "ufw allow 8888",
 
       # join swarm cluster as managers
-      "docker swarm join --token $(cat manager_token) ${digitalocean_droplet.minitwit-swarm-master.ipv4_address}"
+      "docker swarm join --token $(cat manager_token) ${digitalocean_droplet.minitwit-swarm-leader.ipv4_address}"
     ]
   }
 }
@@ -116,8 +117,8 @@ resource "digitalocean_droplet" "minitwit-swarm-manager" {
 #
 # create cloud vm
 resource "digitalocean_droplet" "minitwit-swarm-worker" {
-  # create workers after the master
-  depends_on = [digitalocean_droplet.minitwit-swarm-master]
+  # create workers after the leader
+  depends_on = [digitalocean_droplet.minitwit-swarm-leader]
 
   # number of vms to create
   count = 3
@@ -155,13 +156,13 @@ resource "digitalocean_droplet" "minitwit-swarm-worker" {
       "ufw allow 8888",
 
       # join swarm cluster as workers
-      "docker swarm join --token $(cat worker_token) ${digitalocean_droplet.minitwit-swarm-master.ipv4_address}"
+      "docker swarm join --token $(cat worker_token) ${digitalocean_droplet.minitwit-swarm-leader.ipv4_address}"
     ]
   }
 }
 
-output "minitwit-swarm-master-ip-address" {
-  value = digitalocean_droplet.minitwit-swarm-master.ipv4_address
+output "minitwit-swarm-leader-ip-address" {
+  value = digitalocean_droplet.minitwit-swarm-leader.ipv4_address
 }
 
 output "minitwit-swarm-manager-ip-address" {

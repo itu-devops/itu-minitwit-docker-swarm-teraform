@@ -7,7 +7,7 @@ config_file='temp/load_balancer.conf'
 key_file='ssh_key/terraform'
 
 # ugly list concatenating of ips from terraform output
-rows=$(terraform output minitwit-swarm-master-ip-address)
+rows=$(terraform output minitwit-swarm-leader-ip-address)
 rows+=' '
 rows+=$(terraform output -json minitwit-swarm-manager-ip-address | jq -r .[])
 rows+=' '
