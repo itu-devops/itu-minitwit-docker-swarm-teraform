@@ -21,16 +21,13 @@ On ubuntu install with:
 sudo apt update && sudo apt install -y jq
 ```
 
+On other systems:
+
+Download the binaries here: https://stedolan.github.io/jq/ and put them in a folder included in your system's PATH.
+
 ### Install terraform
 
-On Ubuntu
-```bash
-wget https://releases.hashicorp.com/terraform/0.12.24/terraform_0.12.24_linux_amd64.zip
-unzip terraform_0.12.24_linux_amd64.zip
-rm terraform_0.12.24_linux_amd64.zip
-mv terraform /usr/bin/terraform
-```
-For other platforms: https://www.terraform.io/downloads.html
+Follow the instructions here: https://learn.hashicorp.com/tutorials/terraform/install-cli
 
 ### Clone this repository
 
@@ -257,7 +254,7 @@ We have a few options in terms of scaling the deployment:
 
 By default the cluster will initialze with one leader, 2 managers and 3 workers, so 6 total nodes. Let's increase that.
 
-Edit the `minitwit_swarm_cluster.tf` file with your favourite text editor. Then change the worker count from 3 to 5.
+Edit the `minitwit_swarm_cluster.tf` file with your favourite text editor. Then change the worker count from 3 to 5 (line 124).
 
 Source the secrets file `source secrets`, in order to load the `do_token` variable into your shell, you can also simply paste it when prompted in the next command.
 
@@ -267,7 +264,7 @@ This should now add to new droplets and join them to the swarm cluster as worker
 
 Now ssh to the leader node:
 ```bash
-ssh root@$(terraform output minitwit-swarm-leader-ip-address) -i ssh_key/terraform
+ssh root@$(terraform output -raw minitwit-swarm-leader-ip-address) -i ssh_key/terraform
 ```
 Verify that the two new workers are present
 ```bash
@@ -279,11 +276,11 @@ Verify that the stack is deployed and running smoothly
 docker stack ps minitwit
 ```
 
-Now exit the ssh session and edit the docker stack file on your local machine, the file is located in `stack/minitwit_stack.yml`. Change the replicas of the `minitwitimage` service from 10 to 15. Save the file.
+Now exit the ssh session and edit the docker stack file on your local machine, the file is located in `stack/minitwit_stack.yml`. Change the replicas of the `minitwitimage` service from 10 to 15 (line 32). Save the file.
 
 Scp the stack file to the leader node:
 ```bash
-scp -i ssh_key/terraform stack/minitwit_stack.yml root@$(terraform output minitwit-swarm-leader-ip-address):~
+scp -i ssh_key/terraform stack/minitwit_stack.yml root@$(terraform output -raw minitwit-swarm-leader-ip-address):~
 ```
 
 Now ssh to the leader node again.
@@ -305,7 +302,7 @@ Now feel free to play around with the system :-)
 
 To interact with the swarm cluster and the minitwit stack we need to have shell on a node in the cluster, so we SSH to the leader node:
 ```bash
-ssh root@$(terraform output minitwit-swarm-leader-ip-address) -i ssh_key/terraform
+ssh root@$(terraform output -raw minitwit-swarm-leader-ip-address) -i ssh_key/terraform
 ```
 ### A few interesting docker swarm commands:
 
@@ -402,6 +399,7 @@ List all outputs
 ```bash
 terraform output
 ```
+Note: the output command is designed for human readable output, so everything will be surrounded with "quotes". If you want to use this command in scripts to feed the output into other commands, you should add the option output -raw to omit the quotes.
 
 
 

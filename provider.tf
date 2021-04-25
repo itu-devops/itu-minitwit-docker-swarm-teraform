@@ -11,12 +11,19 @@ variable "pub_key" {}
 variable "pvt_key" {}
 
 # setup the provider
+terraform {
+        required_providers {
+                digitalocean = {
+                        source = "digitalocean/digitalocean"
+                        version = "~> 2.8.0"
+                }
+                null = {
+                        source = "hashicorp/null"
+                        version = "3.1.0"
+                }
+        }
+}
+
 provider "digitalocean" {
   token = var.do_token
-  version = "1.14"
 }
-
-provider "null" {
-  version = "2.1"
-}
-
