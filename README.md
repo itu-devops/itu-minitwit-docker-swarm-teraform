@@ -3,7 +3,7 @@
 
 In this scenario we will create a scalable docker swarm cluster using terraform.
 
-With terraform we will first create a Digital Ocean droplet that will initialize the swarm cluster, making it the leader. We then create a number of droplets that join the swarm cluster as managers and the a number of droplets that join the swarm cluster as workers. We also attach a public floating ip to the leader droplet, we store all of the terraform state in a Digital Ocean Space, so that it is avialble from any system that we gice access to modify our cluster, such as a CI pipeline.
+With terraform we will first create a Digital Ocean droplet that will initialize the swarm cluster, making it the leader. We then create a number of droplets that join the swarm cluster as managers and the a number of droplets that join the swarm cluster as workers. We also attach a public floating ip to the leader droplet, we store all of the terraform state in a Digital Ocean Space, so that it is avialble from any system that we give access to modify our cluster, such as a CI pipeline.
 
 When our swarm cluster is up and running we deploy minitwit to the cluster using a declarative docker stack file.
 
