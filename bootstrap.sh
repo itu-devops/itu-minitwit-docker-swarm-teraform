@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 echo -e "\n--> Bootstrapping Minitwit\n"
 
 echo -e "\n--> Loading environment variables from secrets file\n"
