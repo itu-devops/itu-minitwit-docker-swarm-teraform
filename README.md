@@ -3,7 +3,7 @@
 
 In this scenario we will create a scalable docker swarm cluster using terraform.
 
-With terraform we will first create a Digital Ocean droplet that will initialize the swarm cluster, making it the leader. We then create a number of droplets that join the swarm cluster as managers and the a number of droplets that join the swarm cluster as workers. We also attach a public floating ip to the leader droplet, we store all of the terraform state in a Digital Ocean Space, so that it is avialble from any system that we give access to modify our cluster, such as a CI pipeline.
+With terraform we will first create a Digital Ocean droplet that will initialize the swarm cluster, making it the leader. We then create a number of droplets that join the swarm cluster as managers and a number of droplets that join the swarm cluster as workers. We also attach a public floating ip to the leader droplet, we store all of the terraform state in a Digital Ocean Space, so that it is available from any system that we give access to modify our cluster, such as a CI pipeline.
 
 When our swarm cluster is up and running we deploy minitwit to the cluster using a declarative docker stack file.
 
@@ -54,7 +54,7 @@ Copy the template file:
 cp secrets_template secrets
 ```
 
-We need to fille in the blanks for the five environment variables:
+We need to fill in the blanks for the five environment variables:
 
 
 ```bash
@@ -69,36 +69,33 @@ The following steps outline how to get each variable:
 
 #### Digital Ocean token
 
-To be abel to provision digital ocean resources using terraform we need an API token. Log in to the cloud portal: https://cloud.digitalocean.com
+To be able to provision digital ocean resources using terraform we need an API token. Log in to the cloud portal: https://cloud.digitalocean.com
 Then navigate to the API page in left menu on the left: (https://cloud.digitalocean.com/account/api/).
 
-From here click on `Generate New Token`. Enter a name for the token, like 'terraform'. After confirming the token will show in the list and can be copied. Note that this is the only time the token will be visible, and you'll have to regenerate the token if you need to see it again.
+From here click on `Generate New Token`. Enter a name for the token, like 'terraform', and give it 'Full Access'. After confirming the token will show in the list and can be copied. Note that this is the only time the token will be visible, and you'll have to regenerate the token if you need to see it again.
 
 ![](images/token.png)
 
 The token string will be the value for the `TF_VAR_do_token` environment variable.
 
-By adding the prefix `TF_VAR_` to the environment variable, terraform will load `TF_VAR_<variable>` as `<variable>`, thus we can conveiently load the secret without keeping it in any version controlled files. You could also not set the variable and provide it on the command line when prompted, when executing any of the terraform commands.
+By adding the prefix `TF_VAR_` to the environment variable, terraform will load `TF_VAR_<variable>` as `<variable>`, thus we can conveniently load the secret without keeping it in any version controlled files. You could also not set the variable and provide it on the command line when prompted, when executing any of the terraform commands.
 
 #### Digital Ocean Space
 
 Digital Ocean's blob storage is called `Spaces`, they are essentially AWS s3 buckets but on Digital Ocean, and use an identical API, so tools designed for using s3 buckets will work with Spaces. We will use a 'Space' to store our terraform state file, more on that in a minute.
 
-To create a new space click on the spaces tab in menu on the left (https://cloud.digitalocean.com/spaces), then click on the green dropdown `Create` and select 'Spaces.'
+To create a new space click on the Spaces Object Storage tab in the menu on the left (https://cloud.digitalocean.com/spaces), then click on `Create Bucket`.
+Choose the Frankfurt datacenter region and enter a name for the space. I called my space 'minitwit-terraform', you must choose a different unique name.
 
 ![](images/create_space.png)
 
-Choose the Frankfurt datacenter region and enter a name for the space. I called my space 'minitwit-terraform', you must choose a different unique name.
+Click 'Create a Spaces Bucket'.
 
-![](images/create_space2.png)
-
-Click 'Create Space'.
-
-The name we entereted for the space will be the value for the `SPACE_NAME` value in the `secrets` file.
+The name we entered for the space will be the value for the `SPACE_NAME` value in the `secrets` file.
 
 #### Spaces access keys
 
-Next we need to generate a key pair to access our space. Go to the API page where we generated the API token. Click `Generate New Key`, and enter a name, like 'minitwit'. The key consits of two strings the key itself and the secret key. The keys will be displayed right after creation, and then never again, like with the API token, so make sure to save them. We put the key and secret key into the `secrets` file: the key is the value for `AWS_ACCESS_KEY_ID` and the secret key is the value for `AWS_SECRET_ACCESS_KEY`. The reason that the environment variable are called 'AWS...' is that the tools that utilitize them were made for interacting with AWS s3 buckets, but we can use them for Digital Ocean spaces as they share the same API, though the naming can get a little confusing.
+Next we need to generate a key pair to access our space. In the 'Spaces Object Storage' overview, go to the 'Access Keys' tab. Click the `Create Access Key` button, and create an Access Key with either limited access and with permissions to the bucket, or simply Full Access. You can enter a name, like 'minitwit'. The key consists of two strings: the 'Access Key ID' and the secret key. The secret key will be displayed right after creation, and then never again, like with the API token, so make sure to save it. We put the key id and secret key into the `secrets` file: the key id is the value for `AWS_ACCESS_KEY_ID` and the secret key is the value for `AWS_SECRET_ACCESS_KEY`. The reason that the environment variables are called 'AWS...' is that the tools that utilize them were made for interacting with AWS s3 buckets, but we can use them for Digital Ocean spaces as they share the same API, though the naming can get a little confusing.
 
 ![](images/access_keys.png)
 
@@ -120,13 +117,13 @@ export AWS_SECRET_ACCESS_KEY=yp2l53hk1odj1F2FOdd64H4plieEPrn3+ke1Y53NpuE
 
 (these are just example values and were destroyed after writing this guide.)
 
-We now have all we need to bootsrap the docker swarm cluster and run minitwit on it.
+We now have all we need to bootstrap the docker swarm cluster and run minitwit on it.
 
 
 
 # Docker Stack
 
-`docker stack` is `docker-compose` but for swarm clusters. docker stacks let's us declaratively configure our services that we want to run in our cluster. A docker stack file is the same as a docker-compose but has a few more keys available, namely `deploy`, that let's us specify the number of replicas for `replicated services` or specify a service as a `global` service (1 container on each node).
+`docker stack` is `docker-compose` but for swarm clusters. docker stacks lets us declaratively configure our services that we want to run in our cluster. A docker stack file is the same as a docker-compose but has a few more keys available, namely `deploy`, that let's us specify the number of replicas for `replicated services` or specify a service as a `global` service (1 container on each node).
 
 Relevant Docker documentation:
 * https://docs.docker.com/compose/swarm/
@@ -183,14 +180,14 @@ services:
 
 ## Loadbalancing
 
-A docker swarm cluster will automatically route requests to containers in the cluster, such that you can make a request to any node in the cluster with the appropriate port, and you will be served from one of the replicas of that service in the cluster, even if there are no containers running on the node you are sending requests to. Thus there isn't an explicit need for external loadbalancers, though they might be convenient for managing certificates and other proxy rules. Thus we run a replicated nginx loadbalancer in the cluster for this scenario in order to demonstrate how one could do it, and also that it creates some complications, namely that this configuration requires us to bindmount the nginx configutarion file into the containers. This means that we must ensure that the configuration files are present on all nodes, as we do not know on which node the nginx containers will be created.
+A docker swarm cluster will automatically route requests to containers in the cluster, such that you can make a request to any node in the cluster with the appropriate port, and you will be served from one of the replicas of that service in the cluster, even if there are no containers running on the node you are sending requests to. Thus there isn't an explicit need for external loadbalancers, though they might be convenient for managing certificates and other proxy rules. Thus we run a replicated nginx loadbalancer in the cluster for this scenario in order to demonstrate how one could do it, and also that it creates some complications, namely that this configuration requires us to bindmount the nginx configuration file into the containers. This means that we must ensure that the configuration files are present on all nodes, as we do not know on which node the nginx containers will be created.
 
 A good exercise could be to automate creating a nginx image that has the configuration inside the image as part of the bootstrapping and use that instead.
 
 
 ## Cluster databases and docker networks
 
-In this configuration we declare one mysql database container to run in the cluster. For production setups the consensus in the industry seems to be to either run the databases outside the cluster, or use the cloud-provider's scalable database offerings. For the purposes of this scenario we run it in the cluster to first; highlight why this can be problematic, since we do not know which node the database will be created on, and thus where the state will be stored, further we cannot simply add more database containers as this will create race conditions where the different containers will have different state. The second thing worth noting is that what we do get from running in the cluster is trivial networking and loadbalancing. ALl of the minitwit app containers simply point to the database service name as the database hostname, we can do this because docker networks use the service names for DNS. This means that we can create trivial connections within the cluster, not just for databases, as long as it doesn't matter which container replica we reach.
+In this configuration we declare one mysql database container to run in the cluster. For production setups the consensus in the industry seems to be to either run the databases outside the cluster, or use the cloud-provider's scalable database offerings. For the purposes of this scenario we run it in the cluster to first; highlight why this can be problematic, since we do not know which node the database will be created on, and thus where the state will be stored, further we cannot simply add more database containers as this will create race conditions where the different containers will have different state. The second thing worth noting is that what we do get from running in the cluster is trivial networking and loadbalancing. All of the minitwit app containers simply point to the database service name as the database hostname, we can do this because docker networks use the service names for DNS. This means that we can create trivial connections within the cluster, not just for databases, as long as it doesn't matter which container replica we reach.
 
 You can inspect the networks of the docker swarm by SSH'ing to one of the nodes and using the `docker network` command.
 
@@ -201,7 +198,7 @@ You can inspect the networks of the docker swarm by SSH'ing to one of the nodes 
 
 Nodes in docker swarm clusters have one of three roles:
 * `leader` the primary manager, does the actual orchestration of the cluster
-* `manager` nodes that can manage the cluster, commands can be issued to managers, and will be carried out by the leader. If leader becomes unavailable, a manager will be promoted to the new leader.
+* `manager` nodes that can manage the cluster, commands can be issued to managers, and will be carried out by the leader. If the leader becomes unavailable, a manager will be promoted to the new leader.
 * `worker` hosts containers
 
 **Do note that in a docker swarm cluster, the leader is also a manager, and all managers are also workers! (at least by default)**
@@ -247,14 +244,14 @@ We can inspect the running cluster and stack with the visualizer container:
 
 We have a few options in terms of scaling the deployment:
 * We can scale the deployment vertically by increasing the size of the droplet vms the cluster is running on, by editing the terraform file `minitwit_swarm_cluster.tf` and increasing the `size` key in the droplet resources. This would allow us to scale the minitwit stack by adding more containers for each cluster node.
-* We can scale the deployment horizontally by increaing the number of nodes in the cluster, by changing the number of `count` key in terraform file.
+* We can scale the deployment horizontally by increasing the number of nodes in the cluster, by changing the number of the `count` key in the terraform file.
 * Finally we can scale the minitwit stack horizontally by increasing the number of replicas of each service in the stack. We do this by changing the integer value of the `replicas` key in the stack file `stack/minitwit_stack.yml` and uploading it to the swarm leader, and updating the running stack to the new desired state.
 
 ## Let's scale the cluster up
 
-By default the cluster will initialze with one leader, 2 managers and 3 workers, so 6 total nodes. Let's increase that.
+By default the cluster will initialize with one leader, 2 managers and 3 workers, so 6 total nodes. Let's increase that.
 
-Edit the `minitwit_swarm_cluster.tf` file with your favourite text editor. Then change the worker count from 3 to 5 (line 124).
+Edit the `minitwit_swarm_cluster.tf` file with your favourite text editor. Then change the worker count from 3 to 5 (line 135).
 
 Source the secrets file `source secrets`, in order to load the `do_token` variable into your shell, you can also simply paste it when prompted in the next command.
 
@@ -413,12 +410,12 @@ Note: the output command is designed for human readable output, so everything wi
 
 ## Terraform backends
 
-Terraform maintains a `.tfstate` file that contains the current state of your infrastructure. `backends` are the different ways that terraform can store this state file. By default terraform will use the `local` backend which is simply creating files locally, which is fine for testing. For production deployments we want to store the statefiles a safe place, so that we don't loose them, and so that the state is not tied to a single machine for teams working on the same infrastructure.
+Terraform maintains a `.tfstate` file that contains the current state of your infrastructure. `backends` are the different ways that terraform can store this state file. By default terraform will use the `local` backend which is simply creating files locally, which is fine for testing. For production deployments we want to store the statefiles in a safe place, so that we don't lose them, and so that the state is not tied to a single machine for teams working on the same infrastructure.
 
-Therefore in this scenario we use Digital Ocean space to store our terraform state files, such that all terraform commands interact wit the remote state.
+Therefore in this scenario we use Digital Ocean space to store our terraform state files, such that all terraform commands interact with the remote state.
 
 ### Integrating with CI
 
-Another usecase for remote terraform state is that we can make the state avilable to our CI systems. Since they are simply stored in a s3-API-compatible blob store, we can use s3 tools to interact with the files. An example of how to do this is found in the `docker/s3cmd` directory. `s3cmd` is a cli tool for interacting with s3 buckets. the `docker/s3cmd` directory contains a dockerfile that contains s3cmd ready-to-use, by simply providing the keys as environment variables. The script `docker/s3cmd/get_terraform_state.sh` shows how to use the docker image to get the terraform state files. Terraform state files are plain JSON so we can use tools like `jq` to easily parse the values we need, like the ip addresses of the nodes. Also note in the example below that I `source` the secrets file to load the variables into my shell.
+Another use case for remote terraform states is that we can make the state available to our CI systems. Since they are simply stored in a s3-API-compatible blob store, we can use s3 tools to interact with the files. An example of how to do this is found in the `docker/s3cmd` directory. `s3cmd` is a cli tool for interacting with s3 buckets. The `docker/s3cmd` directory contains a dockerfile that contains s3cmd ready-to-use, by simply providing the keys as environment variables. The script `docker/s3cmd/get_terraform_state.sh` shows how to use the docker image to get the terraform state files. Terraform state files are plain JSON so we can use tools like `jq` to easily parse the values we need, like the ip addresses of the nodes. Also note in the example below that I `source` the secrets file to load the variables into my shell.
 
 ![](images/s3cmd.png)
